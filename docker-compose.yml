@@ -51,8 +51,7 @@ services:
       REDIS_PORT: "6379"
       DEBUG: "True"
       ALLOWED_HOSTS: "127.0.0.1,localhost"
-      GOOGLE_CLIENT_ID: "522790721736-b59vqiheub758288ei3lrr178pshld1t.apps.googleusercontent.com"
-      GOOGLE_CLIENT_SECRET: "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"
+
     volumes:
       - media_data:/app/media
 
