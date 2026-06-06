@@ -1,0 +1,61 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: skill_swap_db
+      POSTGRES_USER: shop
+      POSTGRES_PASSWORD: "12345678"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shop -d skill_swap_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+      start_period: 5s
+
+  web:
+    build: .
+    command: >
+      bash -c "python wait_for_redis.py &&
+      python manage.py migrate &&
+      python manage.py fill_db &&
+      daphne -b 0.0.0.0 -p 8000 skill_swap.asgi:application"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: skill_swap_db
+      DB_USER: shop
+      DB_PASSWORD: "12345678"
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      DEBUG: "True"
+      ALLOWED_HOSTS: "127.0.0.1,localhost"
+      GOOGLE_CLIENT_ID: "522790721736-b59vqiheub758288ei3lrr178pshld1t.apps.googleusercontent.com"
+      GOOGLE_CLIENT_SECRET: "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"
+    volumes:
+      - media_data:/app/media
+
+volumes:
+  postgres_data:
+  media_data:

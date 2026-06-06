@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Чат переговоров — сделка #{{ deal.id }}</h2>
+<p class="text-muted">Обмен: {{ deal.match_offer.offered_skill.title }} ↔ {{ deal.match_offer.target_skill.title }}</p>
+
+<p id="chat-status" class="small text-warning">Подключение к чату...</p>
+
+<div id="chat-log">
+    {% for msg in messages_history %}
+    <div class="mb-2 chat-line">
+        <strong>{{ msg.author.username }}</strong>: {{ msg.text }}
+    </div>
+    {% endfor %}
+</div>
+
+<div class="d-flex gap-2">
+    <input id="chat-message-input" type="text" class="form-control" placeholder="Введите сообщение..." disabled>
+    <button id="chat-message-submit" class="btn btn-primary" disabled>Отправить</button>
+</div>
+
+<script>
+(function() {
+    const dealId = {{ deal.id }};
+    const wsScheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const wsUrl = wsScheme + '://' + window.location.host + '/ws/chat/deal/' + dealId + '/';
+
+    const chatLog = document.querySelector('#chat-log');
+    const statusEl = document.querySelector('#chat-status');
+    const messageInput = document.querySelector('#chat-message-input');
+    const submitBtn = document.querySelector('#chat-message-submit');
+
+    let chatSocket = null;
+
+    function appendMessage(author, text, isSystem) {
+        const row = document.createElement('div');
+        row.className = 'mb-2 chat-line';
+        if (isSystem) {
+            row.className += ' text-muted fst-italic';
+            row.textContent = text;
+        } else {
+            row.innerHTML = '<strong>' + author + '</strong>: ' + text;
+        }
+        chatLog.appendChild(row);
+        chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    function setConnected(connected) {
+        messageInput.disabled = !connected;
+        submitBtn.disabled = !connected;
+        if (connected) {
+            statusEl.textContent = 'Подключено. Сообщения видны обоим участникам без обновления страницы.';
+            statusEl.className = 'small text-success';
+        } else {
+            statusEl.textContent = 'Соединение закрыто. Обновите страницу.';
+            statusEl.className = 'small text-danger';
+        }
+    }
+
+    function connectChat() {
+        chatSocket = new WebSocket(wsUrl);
+
+        chatSocket.onopen = function() {
+            setConnected(true);
+        };
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            if (data.type === 'system') {
+                appendMessage('', data.message, true);
+            } else {
+                appendMessage(data.author, data.message, false);
+            }
+        };
+
+        chatSocket.onclose = function() {
+            setConnected(false);
+        };
+
+        chatSocket.onerror = function() {
+            statusEl.textContent = 'Ошибка WebSocket. Проверьте, что Redis запущен.';
+            statusEl.className = 'small text-danger';
+        };
+    }
+
+    function sendMessage() {
+        if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
+            return;
+        }
+        const message = messageInput.value.trim();
+        if (!message) {
+            return;
+        }
+        chatSocket.send(JSON.stringify({ message: message }));
+        messageInput.value = '';
+    }
+
+    submitBtn.onclick = sendMessage;
+    messageInput.onkeyup = function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    };
+
+    connectChat();
+})();
+</script>
+{% endblock %}

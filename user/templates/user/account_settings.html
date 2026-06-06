@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Управление аккаунтом</h2>
+
+<h3 class="h5 mt-4">Логин и email</h3>
+<form method="post" class="col-md-6">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="account">
+    {{ account_form.as_p }}
+    <button type="submit" class="btn btn-primary">Сохранить данные</button>
+</form>
+
+<h3 class="h5 mt-4">Смена пароля</h3>
+<form method="post" class="col-md-6">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="password">
+    {{ password_form.as_p }}
+    <button type="submit" class="btn btn-warning">Изменить пароль</button>
+</form>
+
+<p class="mt-3"><a href="{% url 'user:password_reset' %}">Сбросить пароль по email</a></p>
+{% endblock %}

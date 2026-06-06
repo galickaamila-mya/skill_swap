@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Завершить сделку #{{ deal.id }}</h2>
+<p>Обмен: {{ deal.match_offer.offered_skill.title }} ↔ {{ deal.match_offer.target_skill.title }}</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-success">Подтвердить завершение</button>
+    <a href="{% url 'matching:deal_list' %}" class="btn btn-secondary">Отмена</a>
+</form>
+{% endblock %}

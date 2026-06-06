@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Оценить {{ rated_user.username }}</h2>
+<p>Сделка #{{ deal.id }} завершена. Оставьте отзыв о партнёре.</p>
+<form method="post" class="col-md-6">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Отправить отзыв</button>
+</form>
+{% endblock %}

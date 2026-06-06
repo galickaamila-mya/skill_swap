@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load socialaccount %}
+{% block content %}
+<h2>Вход в Skill Swap</h2>
+<form method="post" class="col-md-6">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Войти</button>
+</form>
+<p class="mt-2"><a href="{% url 'user:password_reset' %}">Забыли пароль?</a></p>
+
+{% get_providers as socialaccount_providers %}
+{% for provider in socialaccount_providers %}
+    {% if provider.id == "google" %}
+    <hr class="my-4">
+    <p class="text-center mb-2">Или войдите через</p>
+    <a href="{% provider_login_url 'google' %}" class="btn btn-danger w-100">
+        Войти через Google
+    </a>
+    {% endif %}
+{% empty %}
+<p class="text-muted text-center small mt-4">
+    Вход через Google появится после настройки Social application в
+    <a href="/admin/">админке</a> (или задайте GOOGLE_CLIENT_ID и GOOGLE_CLIENT_SECRET в docker-compose).
+</p>
+{% endfor %}
+{% endblock %}

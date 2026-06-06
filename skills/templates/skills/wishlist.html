@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Избранные навыки</h2>
+
+{% if wishlist_items %}
+<ul class="list-group">
+    {% for row in wishlist_items %}
+    <li class="list-group-item d-flex justify-content-between">
+        <a href="{% url 'skills:skill_detail' row.skill.id %}">{{ row.skill.title }}</a>
+        <span class="text-muted">{{ row.skill.get_skill_type_display }}</span>
+    </li>
+    {% endfor %}
+</ul>
+<a href="{% url 'skills:clear_wishlist' %}" class="btn btn-outline-danger btn-sm mt-3">Очистить избранное</a>
+{% else %}
+<p>Избранное пустое. Добавьте навыки со страницы навыка.</p>
+{% endif %}
+{% endblock %}

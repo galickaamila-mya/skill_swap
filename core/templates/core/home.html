@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="mb-3">Skill Swap — обмен навыками</h1>
+<p class="text-muted">Найдите партнёра для взаимного обучения: вы учите одному — вас учат другому.</p>
+
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-8">
+        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Поиск навыков...">
+    </div>
+    <div class="col-md-4">
+        <button type="submit" class="btn btn-primary w-100">Найти</button>
+    </div>
+</form>
+
+{% if request.user.is_authenticated and mutual_matches %}
+<section class="mb-4">
+    <h2 class="h4">Взаимные совпадения для вас</h2>
+    <div class="row g-3">
+        {% for match in mutual_matches %}
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ match.partner.username }}</h5>
+                    <p class="mb-1"><strong>Вы хотите:</strong> {{ match.my_want.title }}</p>
+                    <p class="mb-1"><strong>Вы предлагаете:</strong> {{ match.my_offer.title }}</p>
+                    <p class="mb-1"><strong>Партнёр предлагает:</strong> {{ match.partner_offer.title }}</p>
+                    <a href="{% url 'skills:skill_detail' match.partner_offer.id %}" class="btn btn-sm btn-outline-primary mt-2">Подробнее</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<section>
+    <h2 class="h4 mb-3">Последние навыки</h2>
+    <div class="row g-3">
+        {% for skill in skills %}
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <span class="badge bg-secondary">{{ skill.get_skill_type_display }}</span>
+                    <h5 class="card-title mt-2">{{ skill.title }}</h5>
+                    <p class="card-text small">{{ skill.description|truncatechars:100 }}</p>
+                    <a href="{% url 'skills:skill_detail' skill.id %}" class="btn btn-sm btn-primary">Открыть</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>Пока нет навыков. Добавьте первый!</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

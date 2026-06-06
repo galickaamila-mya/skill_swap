@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Каталог навыков</h2>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Поиск...">
+    </div>
+    <div class="col-md-3">
+        <select name="skill_type" class="form-select">
+            <option value="">Все типы</option>
+            <option value="offer" {% if skill_type == 'offer' %}selected{% endif %}>Предлагаю</option>
+            <option value="want" {% if skill_type == 'want' %}selected{% endif %}>Хочу изучить</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select name="category" class="form-select">
+            <option value="">Все категории</option>
+            {% for cat in categories %}
+            <option value="{{ cat.slug }}" {% if request.GET.category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Фильтр</button>
+    </div>
+</form>
+
+<div class="row g-3">
+    {% for skill in skills %}
+    <div class="col-md-4">
+        <div class="card h-100">
+            {% if skill.portfolio_image %}
+            <img src="{{ skill.portfolio_image.url }}" class="card-img-top" alt="{{ skill.title }}">
+            {% endif %}
+            <div class="card-body">
+                <span class="badge bg-info">{{ skill.get_skill_type_display }}</span>
+                <h5 class="card-title">{{ skill.title }}</h5>
+                <p class="card-text small">{{ skill.description|truncatechars:80 }}</p>
+                <p class="small text-muted">{{ skill.owner.username }} · {{ skill.get_level_display }}</p>
+                <a href="{% url 'skills:skill_detail' skill.id %}" class="btn btn-sm btn-primary">Подробнее</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p>Навыки не найдены.</p>
+    {% endfor %}
+</div>
+{% endblock %}

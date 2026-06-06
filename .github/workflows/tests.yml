@@ -1,0 +1,56 @@
+name: Django CI
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: skill_swap_test
+          POSTGRES_USER: shop
+          POSTGRES_PASSWORD: "12345678"
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Забираем код проекта
+        uses: actions/checkout@v4
+
+      - name: Устанавливаем Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Устанавливаем зависимости
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Запускаем pytest
+        env:
+          DJANGO_SETTINGS_MODULE: skill_swap.settings
+          DB_HOST: localhost
+          DB_NAME: skill_swap_test
+          DB_USER: shop
+          DB_PASSWORD: "12345678"
+          REDIS_HOST: localhost
+        run: pytest

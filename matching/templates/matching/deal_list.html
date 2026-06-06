@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>История сделок</h2>
+<table class="table">
+    <thead>
+        <tr><th>#</th><th>Обмен</th><th>Статус</th><th>Дата</th><th>Действия</th></tr>
+    </thead>
+    <tbody>
+        {% for deal in deals %}
+        <tr>
+            <td>{{ deal.id }}</td>
+            <td>{{ deal.match_offer.offered_skill.title }} ↔ {{ deal.match_offer.target_skill.title }}</td>
+            <td>{{ deal.get_status_display }}</td>
+            <td>{{ deal.created_at|date:"d.m.Y" }}</td>
+            <td>
+                {% if deal.status == 'open' %}
+                <a href="{% url 'chat:deal_chat' deal.id %}" class="btn btn-sm btn-primary">Чат</a>
+                <a href="{% url 'matching:complete_deal' deal.id %}" class="btn btn-sm btn-success">Завершить</a>
+                {% elif deal.status == 'completed' %}
+                <a href="{% url 'matching:rate_deal' deal.id %}" class="btn btn-sm btn-outline-warning">Оценить</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">Сделок пока нет.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

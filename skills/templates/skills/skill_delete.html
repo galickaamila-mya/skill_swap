@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Удалить навык?</h2>
+<p>«{{ skill.title }}» будет скрыт из каталога.</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Да, удалить</button>
+    <a href="{% url 'skills:skill_detail' skill.id %}" class="btn btn-secondary">Отмена</a>
+</form>
+{% endblock %}
